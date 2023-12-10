@@ -1,0 +1,72 @@
+<html>
+<script src="input.js"></script>
+<script defer>
+
+function part1() {
+    const lines = input.split("\n");
+    let idTotal = 0;
+
+    for (const line of lines) {
+        const [id, data] = getIdAndData(line);
+        const [highestRed, highestGreen, highestBlue] = calculateHighestAmountOfColors(data);
+        
+        if (highestRed <= 12 && highestGreen <= 13 && highestBlue <= 14) {
+            idTotal += id;
+        }
+    }
+
+    return idTotal;
+}
+
+function part2() {
+    const lines = input.split("\n");
+    let idTotal = 0;
+
+    for (const line of lines) {
+        const [id, data] = getIdAndData(line);
+        const [highestRed, highestGreen, highestBlue] = calculateHighestAmountOfColors(data);
+        idTotal += highestRed * highestGreen * highestBlue;
+    }
+
+    return idTotal;
+}
+
+function getIdAndData(line) {
+    const [game, data] = line.split(": ");
+    const id = Number(game.split(" ")[1]);
+    return [id, data];
+}
+
+function calculateHighestAmountOfColors(data) {
+    let highestRed = 0;
+    let highestGreen = 0;
+    let highestBlue = 0;
+
+    const showings = data.split("; ");
+
+    for (const showing of showings) {
+        const ballCounts = showing.split(", ");
+
+        for (const ballCount of ballCounts) {
+            const [amount, color] = ballCount.split(" ");
+            
+            if (color === "red") {
+                highestRed = Math.max(highestRed, amount);
+            }
+            if (color === "green") {
+                highestGreen = Math.max(highestGreen, amount);
+            }
+            if (color === "blue") {
+                highestBlue = Math.max(highestBlue, amount);
+            }
+        }
+    }
+
+    return [highestRed, highestGreen, highestBlue];
+}
+
+console.log(part1());
+console.log(part2());
+
+</script>
+</html>

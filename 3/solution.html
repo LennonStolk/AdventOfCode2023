@@ -1,0 +1,165 @@
+<html>
+<script src="input.js"></script>
+<script defer>
+
+// Part 1
+
+function part1() {
+    // Convert input into 2d array
+    const grid = input
+        .split("\n")
+        .map(row => row.split(""));
+
+    // Get the part numbers from the grid and return the sum of them
+    const partNumbers = getPartNumbers(grid);
+    return partNumbers.reduce((acc, partNumber) => acc + partNumber.number, 0);
+}
+
+function getPartNumbers(grid) {
+    const partNumbers = [];
+
+    // Walk through the 2d array from left to right, top to bottom
+    // If a cell contains a digit that's adjacent to a symbol, register it
+    // At the end of a series of digits, add it to the array of part numbers
+    for (const [rowIndex, row] of grid.entries()) {
+        // Set/reset the series of digits
+        let symbolAdjacent = false;
+        let seriesOfDigits = "";
+        let startColumn = -1;
+
+        for (const [columnIndex, cell] of row.entries()) {
+
+            // Not a number
+            if (isNaN(cell)) {
+                // Add the series of digits (with start location) to the part numbers array if:
+                // - The number is adjacent to a symbol
+                if (seriesOfDigits.length > 0 && symbolAdjacent) {
+                    partNumbers.push({
+                        number: Number(seriesOfDigits),
+                        startColumn,
+                        rowIndex,
+                    });
+                }
+                // Reset the series of digits
+                symbolAdjacent = false;
+                seriesOfDigits = "";
+                startColumn = -1;
+            }
+            // Is a number
+            else {
+                // Add the digit to the series of digits
+                seriesOfDigits += cell;
+                // Check if the digit is adjacent to a symbol, if true the whole series is adjacent to a digit
+                if (isAdjacentToSymbol(grid, rowIndex, columnIndex)) {
+                    symbolAdjacent = true;
+                }
+                if (startColumn === -1) {
+                    startColumn = columnIndex;
+                }
+                // Add the series of digits (with start location) to the part numbers array if:
+                // - The row ends
+                // - The number is adjacent to a symbol
+                if (columnIndex === row.length - 1 && symbolAdjacent) {
+                    partNumbers.push({
+                        number: Number(seriesOfDigits),
+                        startColumn,
+                        rowIndex,
+                    });
+                }
+            }
+        }
+    }
+
+    return partNumbers;
+}
+
+function isAdjacentToSymbol(grid, rowIndex, columnIndex) {
+    return (
+        isSymbol(grid, rowIndex-1, columnIndex-1) ||
+        isSymbol(grid, rowIndex-1, columnIndex+0) ||
+        isSymbol(grid, rowIndex-1, columnIndex+1) ||
+        isSymbol(grid, rowIndex+0, columnIndex-1) ||
+        isSymbol(grid, rowIndex+0, columnIndex+1) ||
+        isSymbol(grid, rowIndex+1, columnIndex-1) ||
+        isSymbol(grid, rowIndex+1, columnIndex+0) ||
+        isSymbol(grid, rowIndex+1, columnIndex+1)
+    );
+}
+
+const symbols = "#@*/%$=+-&";
+
+function isSymbol(grid, rowIndex, columnIndex) {
+    return grid[rowIndex] && grid[rowIndex][columnIndex] && symbols.includes(grid[rowIndex][columnIndex]);
+}
+
+// Part 2
+
+function part2() {
+    // Convert input into 2d array
+    const grid = input
+        .split("\n")
+        .map(row => row.split(""));
+
+    // TODO: Map the part numbers from part 1 over the numbers
+    // Example:
+    // - Before [., 1,   2,   3,   #, .]
+    // - After  [., 123, 123, 123, #, .]
+    const partNumbers = getPartNumbers(grid);
+
+    for (const partNumber of partNumbers) {
+        const length = partNumber.number.toString().length;
+        for (let i = 0; i < length; i++) {
+            grid[partNumber.rowIndex][partNumber.startColumn + i] = partNumber.number;
+        }
+    }
+
+    // Walk through array and find gears (* symbol adjacent to exactly part two numbers)
+    // Add the gear ratio (the two part numbers multiplied) to the gear ratio sum
+    let sumOfGearRatios = 0;
+
+    for (const [rowIndex, row] of grid.entries()) {
+        for (const [columnIndex, cell] of row.entries()) {
+            if (cell === "*") {
+                // Get surrounding part numbers from grid
+                const surroundingPartNumbers = getSurroundingUniquePartNumbers(grid, rowIndex, columnIndex);
+
+                if (surroundingPartNumbers.length === 2) {
+                    const [part1, part2] = surroundingPartNumbers;
+                    sumOfGearRatios += part1 * part2;
+                }
+            }
+        }
+    }
+
+    return sumOfGearRatios;
+}
+
+function getSurroundingUniquePartNumbers(grid, rowIndex, columnIndex) {
+    const surroundingPartNumbers = [];
+
+    if (isPartNumber(grid, rowIndex-1, columnIndex-1)) surroundingPartNumbers.push(grid[rowIndex-1][columnIndex-1]);
+    if (isPartNumber(grid, rowIndex-1, columnIndex+0)) surroundingPartNumbers.push(grid[rowIndex-1][columnIndex+0]);
+    if (isPartNumber(grid, rowIndex-1, columnIndex+1)) surroundingPartNumbers.push(grid[rowIndex-1][columnIndex+1]);
+    if (isPartNumber(grid, rowIndex+0, columnIndex-1)) surroundingPartNumbers.push(grid[rowIndex+0][columnIndex-1]);
+    if (isPartNumber(grid, rowIndex+0, columnIndex+1)) surroundingPartNumbers.push(grid[rowIndex+0][columnIndex+1]);
+    if (isPartNumber(grid, rowIndex+1, columnIndex-1)) surroundingPartNumbers.push(grid[rowIndex+1][columnIndex-1]);
+    if (isPartNumber(grid, rowIndex+1, columnIndex+0)) surroundingPartNumbers.push(grid[rowIndex+1][columnIndex+0]);
+    if (isPartNumber(grid, rowIndex+1, columnIndex+1)) surroundingPartNumbers.push(grid[rowIndex+1][columnIndex+1]);
+    
+    const uniquePartNumbers = [...new Set(surroundingPartNumbers)];
+    return uniquePartNumbers;
+}
+
+function isPartNumber(grid, rowIndex, columnIndex) {
+    return (
+        grid[rowIndex] && 
+        grid[rowIndex][columnIndex] && 
+        grid[rowIndex][columnIndex] === Number(grid[rowIndex][columnIndex])
+    );
+}
+
+console.log(part1());
+console.log(part2());
+
+</script>
+</html>

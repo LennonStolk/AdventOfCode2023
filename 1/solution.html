@@ -1,0 +1,60 @@
+<html>
+<script src="input.js"></script>
+<script defer>
+
+function part1() {
+    const lines = input.split("\n");
+    return getTotal(lines);
+}
+
+function part2() {
+    const lines = input
+        .split("\n")
+        .map(convertSpelledDigits);
+    return getTotal(lines);
+}
+
+function getTotal(lines) {
+    let total = 0;
+    for (const line of lines) {
+        const characters = line.split("");
+        total += findFirstDigit(characters) * 10;
+        total += findLastDigit(characters);
+    }
+    return total;
+}
+
+function findFirstDigit(characters) {
+    for(let i = 0; i < characters.length; i++) {
+        if (isNaN(characters[i]) === false) {
+            return Number(characters[i]);
+        }
+    }
+}
+
+function findLastDigit(characters) {
+    for(let i = characters.length; i >= 0; i--) {
+        if (isNaN(characters[i]) === false) {
+            return Number(characters[i]);
+        }
+    }
+}
+
+function convertSpelledDigits(text) {
+    return text
+        .replace(/one/gi, "o1ne")
+        .replace(/two/gi, "t2wo")
+        .replace(/three/gi, "t3hree")
+        .replace(/four/gi, "f4our")
+        .replace(/five/gi, "f5ive")
+        .replace(/six/gi, "s6ix")
+        .replace(/seven/gi, "s7even")
+        .replace(/eight/gi, "e8ight")
+        .replace(/nine/gi, "n9ine");;
+}
+
+console.log(part1());
+console.log(part2());
+
+</script>
+</html>
